@@ -1,5 +1,11 @@
 # clanka
 
+## 0.1.0
+
+### Minor Changes
+
+- [`86a2642`](https://github.com/tim-smart/effect-genserver/commit/86a26429d04b8c529054239916d3d99a5f81c61c) Thanks [@tim-smart](https://github.com/tim-smart)! - initial
+
 ## 0.2.55
 
 ### Patch Changes
