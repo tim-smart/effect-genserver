@@ -1,0 +1,5 @@
+---
+"effect-genserver": minor
+---
+
+initial
