@@ -1,0 +1,10 @@
+.direnv/
+.repos/
+.lalph/
+node_modules/
+dist/
+lalph-plan.md
+*.tsbuildinfo
+data/
+.env
+.clanka/
