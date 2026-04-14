@@ -1,3 +1,3 @@
-# clanka
+# effect-genserver
 
-Make the ai do stuff
+Because I miss elixir
