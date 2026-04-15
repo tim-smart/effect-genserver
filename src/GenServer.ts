@@ -4,6 +4,7 @@
 import * as Rpc from "effect/unstable/rpc/Rpc"
 import * as RpcGroup from "effect/unstable/rpc/RpcGroup"
 import * as Effect from "effect/Effect"
+import * as Deferred from "effect/Deferred"
 import * as Schema from "effect/Schema"
 import * as Layer from "effect/Layer"
 import type * as Scope from "effect/Scope"
@@ -136,7 +137,12 @@ export type HandlerFn<
 }) => Rpc.SuccessSchema<Rpc> extends RpcSchema.Stream<infer A, infer E>
   ? Stream.Stream<A["Type"], E["Type"], R>
   : Effect.Effect<
-      readonly [state: State["Type"], result: Rpc.Success<Rpc>],
+      readonly [
+        state: State["Type"],
+        result:
+          | Rpc.Success<Rpc>
+          | Deferred.Deferred<Rpc.Success<Rpc>, Rpc.Error<Rpc>>,
+      ],
       Rpc.Error<Rpc>,
       R
     >
@@ -332,7 +338,9 @@ export const makeHandlers = Effect.fnUntraced(function* <
         readonly handler: (options: {
           readonly payload: any
           readonly context: Context.Context<never>
-        }) => Stream.Stream<any, any> | Effect.Effect<any, any>
+        }) =>
+          | Stream.Stream<any, any>
+          | Effect.Effect<{} | Deferred.Deferred<any, any>, any>
       }
     >
   },
@@ -346,7 +354,9 @@ export const makeHandlers = Effect.fnUntraced(function* <
       readonly handler: (options: {
         readonly payload: any
         readonly context: Context.Context<never>
-      }) => Stream.Stream<any, any> | Effect.Effect<any, any>
+      }) =>
+        | Stream.Stream<any, any>
+        | Effect.Effect<{} | Deferred.Deferred<any, any>, any>
     }
   >()
   const scope = yield* Effect.scope
@@ -405,7 +415,9 @@ export const makeHandlers = Effect.fnUntraced(function* <
           changes,
           payload: options.payload,
           context: options.context,
-        }) as Stream.Stream<any, any> | Effect.Effect<any, any>
+        }) as
+          | Stream.Stream<any, any>
+          | Effect.Effect<[any, {} | Deferred.Deferred<any, any>], any>
         if (Stream.isStream(result)) return result
         return pipe(
           result,
@@ -503,13 +515,20 @@ export const makeActor = Effect.fnUntraced(function* <
       const message = `Unknown tag: ${tag}`
       return isStream ? Stream.die(message) : Effect.die(message)
     }
-    return entry.handler({
+    const result = entry.handler({
       payload:
         payload_ !== undefined
           ? entry.rpc.payloadSchema.make(payload_)
           : undefined,
       context: requestContext,
     })
+    return Stream.isStream(result)
+      ? result
+      : Effect.flatMap(result, (result) =>
+          Deferred.isDeferred(result)
+            ? Deferred.await(result)
+            : Effect.succeed(result),
+        )
   }
 
   return identity<Actor<State, Rpcs>>({

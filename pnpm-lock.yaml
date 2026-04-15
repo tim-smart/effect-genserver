@@ -19,7 +19,7 @@ importers:
         version: 0.85.1
       '@effect/vitest':
         specifier: 4.0.0-beta.48
-        version: 4.0.0-beta.48(effect@4.0.0-beta.48)(vitest@4.1.4(@types/node@25.6.0)(vite@8.0.8(@types/node@25.6.0)(yaml@2.8.3)))
+        version: 4.0.0-beta.48(effect@https://pkg.pr.new/Effect-TS/effect-smol/effect@07be594)(vitest@4.1.4(@types/node@25.6.0)(vite@8.0.8(@types/node@25.6.0)(yaml@2.8.3)))
       '@types/node':
         specifier: ^25.6.0
         version: 25.6.0
@@ -27,8 +27,8 @@ importers:
         specifier: 7.0.0-dev.20260412.1
         version: 7.0.0-dev.20260412.1
       effect:
-        specifier: 4.0.0-beta.48
-        version: 4.0.0-beta.48
+        specifier: https://pkg.pr.new/Effect-TS/effect-smol/effect@07be594
+        version: https://pkg.pr.new/Effect-TS/effect-smol/effect@07be594
       husky:
         specifier: ^9.1.7
         version: 9.1.7
@@ -121,6 +121,7 @@ packages:
 
   '@effect/vitest@4.0.0-beta.48':
     resolution: {integrity: sha512-ONG24EIfUXTrJzIDJctIr6y6JOeml97eoZ53WRUNdwp/tHIAU+U3ME5uUdmtLBKSFeyivYjXGPvEP2DW8f/bCQ==}
+    version: 4.0.0-beta.48
     peerDependencies:
       effect: ^4.0.0-beta.48
       vitest: ^3.0.0 || ^4.0.0
@@ -588,8 +589,9 @@ packages:
     resolution: {integrity: sha512-IrPdXQsk2BbzvCBGBOTmmSH5SodmqZNt4ERAZDmW4CT+tL8VtvinqywuANaFu4bOMWki16nqf0e4oC0QIaDr/g==}
     engines: {node: '>=10'}
 
-  effect@4.0.0-beta.48:
-    resolution: {integrity: sha512-MMAM/ZabuNdNmgXiin+BAanQXK7qM8mlt7nfXDoJ/Gn9V8i89JlCq+2N0AiWmqFLXjGLA0u3FjiOjSOYQk5uMw==}
+  effect@https://pkg.pr.new/Effect-TS/effect-smol/effect@07be594:
+    resolution: {integrity: sha512-DVKKLI4jRI2m3abxjCs6OUzxK9Ptu/bS7eVjUpPt4xND9AMnilnpF/zlVZI5pxlBLQQBsjCbtbPMkDHx9V7Tvw==, tarball: https://pkg.pr.new/Effect-TS/effect-smol/effect@07be594}
+    version: 4.0.0-beta.49
 
   emoji-regex@10.6.0:
     resolution: {integrity: sha512-toUI84YS5YmxW219erniWD0CIVOo46xGKColeNQRgOzDorgBi1v4D71/OFzgD9GO2UGKIv1C3Sp8DAn0+j5w7A==}
@@ -1401,9 +1403,9 @@ snapshots:
 
   '@effect/language-service@0.85.1': {}
 
-  '@effect/vitest@4.0.0-beta.48(effect@4.0.0-beta.48)(vitest@4.1.4(@types/node@25.6.0)(vite@8.0.8(@types/node@25.6.0)(yaml@2.8.3)))':
+  '@effect/vitest@4.0.0-beta.48(effect@https://pkg.pr.new/Effect-TS/effect-smol/effect@07be594)(vitest@4.1.4(@types/node@25.6.0)(vite@8.0.8(@types/node@25.6.0)(yaml@2.8.3)))':
     dependencies:
-      effect: 4.0.0-beta.48
+      effect: https://pkg.pr.new/Effect-TS/effect-smol/effect@07be594
       vitest: 4.1.4(@types/node@25.6.0)(vite@8.0.8(@types/node@25.6.0)(yaml@2.8.3))
 
   '@emnapi/core@1.9.2':
@@ -1755,7 +1757,7 @@ snapshots:
 
   dotenv@8.6.0: {}
 
-  effect@4.0.0-beta.48:
+  effect@https://pkg.pr.new/Effect-TS/effect-smol/effect@07be594:
     dependencies:
       '@standard-schema/spec': 1.1.0
       fast-check: 4.6.0
