@@ -1,5 +1,11 @@
 # clanka
 
+## 0.1.1
+
+### Patch Changes
+
+- [`903dcb2`](https://github.com/tim-smart/effect-genserver/commit/903dcb266d40542ff901fccd41bf543aa35d4577) Thanks [@tim-smart](https://github.com/tim-smart)! - support stream Rpcs seperate from the server loop
+
 ## 0.1.0
 
 ### Minor Changes
