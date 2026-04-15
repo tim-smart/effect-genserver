@@ -1,14 +1,3 @@
-# effect-genserver
-
-Because I miss elixir
-
-## Usage
-
-```
-pnpm add effect-genserver
-```
-
-```ts
 import { Effect, Layer, Schema } from "effect"
 import { Rpc, RpcServer } from "effect/unstable/rpc"
 import { ClusterGenServer, GenServer, RpcGenServer } from "effect-genserver"
@@ -97,4 +86,3 @@ export const RpcHandlers = RpcGenServer.toRpcHandlers(Counter, CounterLayer)
 export const RpcServerLayer = RpcServer.layer(CounterRpcGroup).pipe(
   Layer.provide(RpcHandlers),
 )
-```
