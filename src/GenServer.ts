@@ -15,7 +15,7 @@ import * as MutableRef from "effect/MutableRef"
 import * as Stream from "effect/Stream"
 import * as Semaphore from "effect/Semaphore"
 import { flow, identity, pipe } from "effect/Function"
-import type * as RpcSchema from "effect/unstable/rpc/RpcSchema"
+import * as RpcSchema from "effect/unstable/rpc/RpcSchema"
 import * as Latch from "effect/Latch"
 import type { Types } from "effect"
 
@@ -130,15 +130,16 @@ export type HandlerFn<
   R,
 > = (options: {
   readonly state: State["Type"]
+  readonly changes: Stream.Stream<State["Type"]>
   readonly payload: Rpc.Payload<Rpc>
   readonly context: Context.Context<never>
-}) => Rpc.WrapperOr<
-  Effect.Effect<
-    readonly [state: State["Type"], result: Rpc.Success<Rpc>],
-    Rpc.Error<Rpc>,
-    R
-  >
->
+}) => Rpc.SuccessSchema<Rpc> extends RpcSchema.Stream<infer A, infer E>
+  ? Stream.Stream<A["Type"], E["Type"], R>
+  : Effect.Effect<
+      readonly [state: State["Type"], result: Rpc.Success<Rpc>],
+      Rpc.Error<Rpc>,
+      R
+    >
 
 /**
  * @since 1.0.0
@@ -153,7 +154,13 @@ export type HandlerServices<Handlers extends Record<string, any>> =
           infer _R
         >
         ? _R
-        : never
+        : ReturnType<Handlers[K]> extends Stream.Stream<
+              infer _A,
+              infer _E,
+              infer _R
+            >
+          ? _R
+          : never
       : never
     : never
 
@@ -205,6 +212,8 @@ const Proto: Omit<GenServer<any, any>, "stateSchema" | "protocol"> = {
       any
     >,
   ) {
+    // oxlint-disable-next-line typescript/no-this-alias
+    const schema = this
     return Layer.fresh(
       Layer.effectContext(
         Effect.gen(function* () {
@@ -213,8 +222,15 @@ const Proto: Omit<GenServer<any, any>, "stateSchema" | "protocol"> = {
           const handlerMap = new Map<string, any>()
           handlerMap.set(initialStateKey, initialState)
           for (const [tag, handler] of Object.entries(handlers)) {
+            const rpc = schema.protocol.requests.get(tag)! as Rpc.AnyWithProps
+            const isStream = RpcSchema.isStreamSchema(rpc.successSchema)
             handlerMap.set(handlerKey(tag), (options: any) =>
-              Rpc.wrapMap(handler(options), Effect.provideContext(services)),
+              isStream
+                ? Stream.provideContext(handler(options) as any, services)
+                : Rpc.wrapMap(
+                    handler(options),
+                    Effect.provideContext(services),
+                  ),
             )
           }
           return Context.makeUnsafe(handlerMap)
@@ -237,6 +253,8 @@ const Proto: Omit<GenServer<any, any>, "stateSchema" | "protocol"> = {
       readonly storeId?: string | undefined
     },
   ) {
+    // oxlint-disable-next-line typescript/no-this-alias
+    const schema = this
     const storeId = options?.storeId ?? "machine"
     const stateFromJson = Schema.toCodecJson(this.stateSchema)
     const decode = Schema.decodeUnknownEffect(stateFromJson)
@@ -263,18 +281,22 @@ const Proto: Omit<GenServer<any, any>, "stateSchema" | "protocol"> = {
             initialState,
           ])
           for (const [tag, handler] of Object.entries(handlers)) {
+            const rpc = schema.protocol.requests.get(tag)! as Rpc.AnyWithProps
+            const isStream = RpcSchema.isStreamSchema(rpc.successSchema)
             handlerMap.set(handlerKey(tag), (options: any) =>
-              Rpc.wrapMap(
-                handler(options),
-                flow(
-                  Effect.tap(([state]) =>
-                    Effect.flatMap(encode(state), (a) =>
-                      store.set(currentId, a as any, undefined),
+              isStream
+                ? Stream.provideContext(handler(options) as any, services)
+                : Rpc.wrapMap(
+                    handler(options),
+                    flow(
+                      Effect.tap(([state]) =>
+                        Effect.flatMap(encode(state), (a) =>
+                          store.set(currentId, a as any, undefined),
+                        ),
+                      ),
+                      Effect.provideContext(services),
                     ),
                   ),
-                  Effect.provideContext(services),
-                ),
-              ),
             )
           }
           return Context.makeUnsafe(handlerMap)
@@ -310,7 +332,7 @@ export const makeHandlers = Effect.fnUntraced(function* <
         readonly handler: (options: {
           readonly payload: any
           readonly context: Context.Context<never>
-        }) => Rpc.WrapperOr<Effect.Effect<any, any>>
+        }) => Stream.Stream<any, any> | Effect.Effect<any, any>
       }
     >
   },
@@ -324,7 +346,7 @@ export const makeHandlers = Effect.fnUntraced(function* <
       readonly handler: (options: {
         readonly payload: any
         readonly context: Context.Context<never>
-      }) => Rpc.WrapperOr<Effect.Effect<any, any>>
+      }) => Stream.Stream<any, any> | Effect.Effect<any, any>
     }
   >()
   const scope = yield* Effect.scope
@@ -349,7 +371,7 @@ export const makeHandlers = Effect.fnUntraced(function* <
         payload,
         context: Context.empty(),
       })
-      return Rpc.isWrapper(result) ? result.value : result
+      return Stream.isStream(result) ? Stream.runDrain(result) : result
     })
 
   const services = yield* Layer.build(layer).pipe(
@@ -362,6 +384,7 @@ export const makeHandlers = Effect.fnUntraced(function* <
     replay: 1,
   })
   PubSub.publishUnsafe(pubsub, state.current)
+  const changes = Stream.fromPubSub(pubsub)
 
   handlers.set(stateChanges._tag, {
     rpc: stateChanges,
@@ -376,26 +399,26 @@ export const makeHandlers = Effect.fnUntraced(function* <
     >
     handlers.set(rpc._tag, {
       rpc: rpc as any,
-      handler: (options) =>
-        Rpc.wrapMap(
-          handler({
-            state: state.current,
-            payload: options.payload,
-            context: options.context,
+      handler: (options) => {
+        const result = handler({
+          state: state.current,
+          changes,
+          payload: options.payload,
+          context: options.context,
+        }) as Stream.Stream<any, any> | Effect.Effect<any, any>
+        if (Stream.isStream(result)) return result
+        return pipe(
+          result,
+          Effect.map(([nextState, result]) => {
+            if (nextState !== state.current) {
+              MutableRef.set(state, nextState)
+              PubSub.publishUnsafe(pubsub, nextState)
+            }
+            return result
           }),
-          (effect) =>
-            pipe(
-              effect,
-              Effect.map(([nextState, result]) => {
-                if (nextState !== state.current) {
-                  MutableRef.set(state, nextState)
-                  PubSub.publishUnsafe(pubsub, nextState)
-                }
-                return result
-              }),
-              sendSemaphore.withPermits(1),
-            ),
-        ),
+          sendSemaphore.withPermits(1),
+        )
+      },
     })
   }
 
@@ -440,7 +463,9 @@ export interface Actor<State extends Schema.Top, Rpcs extends Rpc.Any> {
       [payload?: Payload],
       [payload: Payload]
     >
-  ): Effect.Effect<Rpc.Success<Rpc>, Rpc.Error<Rpc>>
+  ): Rpc.SuccessSchema<Rpc> extends RpcSchema.Stream<infer A, infer E>
+    ? Stream.Stream<A["Type"], E["Type"]>
+    : Effect.Effect<Rpc.Success<Rpc>, Rpc.Error<Rpc>>
 }
 
 /**
@@ -473,16 +498,18 @@ export const makeActor = Effect.fnUntraced(function* <
   ) => {
     const entry = handlers.get(tag)
     if (!entry) {
-      return Effect.die(`Unknown tag: ${tag}`)
+      const rpc = schema.protocol.requests.get(tag)! as any as Rpc.AnyWithProps
+      const isStream = RpcSchema.isStreamSchema(rpc.successSchema)
+      const message = `Unknown tag: ${tag}`
+      return isStream ? Stream.die(message) : Effect.die(message)
     }
-    const effectOrWrap = entry.handler({
+    return entry.handler({
       payload:
         payload_ !== undefined
           ? entry.rpc.payloadSchema.make(payload_)
           : undefined,
       context: requestContext,
     })
-    return Rpc.isWrapper(effectOrWrap) ? effectOrWrap.value : effectOrWrap
   }
 
   return identity<Actor<State, Rpcs>>({

@@ -2,6 +2,7 @@
  * @since 1.0.0
  */
 import type * as Rpc from "effect/unstable/rpc/Rpc"
+import * as RpcSchema from "effect/unstable/rpc/RpcSchema"
 import * as Effect from "effect/Effect"
 import type * as Schema from "effect/Schema"
 import * as Layer from "effect/Layer"
@@ -45,15 +46,15 @@ export const make = <
   readonly actor: Atom.Atom<
     AsyncResult.AsyncResult<GenServer.Actor<State, Rpcs>, E>
   >
-  readonly send: <Tag extends Rpcs["_tag"]>(
+  readonly send: <Tag extends Rpcs["_tag"], Rpc = Rpc.ExtractTag<Rpcs, Tag>>(
     tag: Tag,
     options?: {
       readonly concurrent?: boolean | undefined
     },
   ) => Atom.AtomResultFn<
-    Rpc.PayloadConstructor<Rpc.ExtractTag<Rpcs, Tag>>,
-    Rpc.Success<Rpc.ExtractTag<Rpcs, Tag>>,
-    E | Schema.Schema.Type<Rpc.ErrorSchema<Rpc.ExtractTag<Rpcs, Tag>>>
+    Rpc.PayloadConstructor<Rpc>,
+    Rpc.SuccessExit<Rpc>,
+    E | Rpc.ErrorExit<Rpc>
   >
   readonly state: Atom.Atom<
     [InitialState] extends [undefined]
@@ -88,25 +89,44 @@ export const make = <
     Rpc = Rpc.ExtractTag<Rpcs, Tag>,
   >([tag, concurrent]: [Tag, boolean]): Atom.AtomResultFn<
     Rpc.PayloadConstructor<Rpc>,
-    Rpc.Success<Rpc>,
-    Rpc.Error<Rpc> | E
+    Rpc.SuccessExit<Rpc>,
+    Rpc.ErrorExit<Rpc> | E
   > => {
+    const rpc = server.protocol.requests.get(tag)! as any as Rpc.AnyWithProps
+    const isStream = RpcSchema.isStreamSchema(rpc.successSchema)
+    if (isStream) {
+      return Atom.fn((payload, get) =>
+        pipe(
+          get.result(actor),
+          Effect.map(
+            (actor) => actor.send(tag, payload) as Stream.Stream<any, any>,
+          ),
+          Stream.unwrap,
+        ),
+      )
+    }
     return Atom.fn(
       (payload, get) =>
         pipe(
           get.result(actor),
-          Effect.flatMap((actor) => actor.send(tag, payload)),
+          Effect.flatMap(
+            (actor) => actor.send(tag, payload) as Effect.Effect<any, any>,
+          ),
         ),
       { concurrent },
     )
   }
 
-  const send = <Tag extends Rpcs["_tag"]>(
+  const send = <Tag extends Rpcs["_tag"], Rpc = Rpc.ExtractTag<Rpcs, Tag>>(
     tag: Tag,
     options?: {
       readonly concurrent?: boolean | undefined
     },
-  ) => sendFamily([tag, options?.concurrent ?? false])
+  ): Atom.AtomResultFn<
+    Rpc.PayloadConstructor<Rpc>,
+    Rpc.SuccessExit<Rpc>,
+    E | Rpc.ErrorExit<Rpc>
+  > => sendFamily([tag, options?.concurrent ?? false])
 
   return { actor, send, state }
 }

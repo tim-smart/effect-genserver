@@ -1,7 +1,7 @@
 /**
  * @since 1.0.0
  */
-import type * as Rpc from "effect/unstable/rpc/Rpc"
+import * as Rpc from "effect/unstable/rpc/Rpc"
 import * as Effect from "effect/Effect"
 import type * as Schema from "effect/Schema"
 import * as Layer from "effect/Layer"
@@ -9,6 +9,7 @@ import * as Context from "effect/Context"
 import type * as RpcMessage from "effect/unstable/rpc/RpcMessage"
 import type * as Headers from "effect/unstable/http/Headers"
 import * as GenServer from "./GenServer.ts"
+import * as Stream from "effect/Stream"
 
 /**
  * @since 1.0.0
@@ -38,11 +39,13 @@ export const toRpcHandlers = <
           _: null as any,
           tag: rpc._tag,
           context: services,
-          handler: (payload, options) =>
-            handler({
+          handler(payload, options): any {
+            const result = handler({
               payload,
               context: RpcContext.context(options as any),
-            }) as any,
+            }) as Stream.Stream<any, any> | Effect.Effect<any, any>
+            return Stream.isStream(result) ? Rpc.fork(result) : result
+          },
         })
       }
 

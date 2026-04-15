@@ -1,7 +1,7 @@
 /**
  * @since 1.0.0
  */
-import type * as Rpc from "effect/unstable/rpc/Rpc"
+import * as Rpc from "effect/unstable/rpc/Rpc"
 import * as Effect from "effect/Effect"
 import type * as Schema from "effect/Schema"
 import type * as Layer from "effect/Layer"
@@ -11,6 +11,7 @@ import type * as RpcSchema from "effect/unstable/rpc/RpcSchema"
 import * as Entity from "effect/unstable/cluster/Entity"
 import type * as Envelope from "effect/unstable/cluster/Envelope"
 import * as GenServer from "./GenServer.ts"
+import * as Stream from "effect/Stream"
 
 /**
  * @since 1.0.0
@@ -77,11 +78,13 @@ export const entityHandlers = Effect.fnUntraced(function* <
     (request: Envelope.Request<any>) => any
   > = {}
   for (const { rpc, handler } of handlers.values()) {
-    entityHandlers[rpc._tag] = (request: Envelope.Request<any>) =>
-      handler({
+    entityHandlers[rpc._tag] = (request: Envelope.Request<any>) => {
+      const result = handler({
         payload: request.payload,
         context: ClusterRequest.context(request),
       })
+      return Stream.isStream(result) ? Rpc.fork(result) : result
+    }
   }
   return entityHandlers as any
 })
