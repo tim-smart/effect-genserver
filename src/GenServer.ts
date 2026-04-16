@@ -29,17 +29,13 @@ export interface GenServer<State extends Schema.Top, Rpcs extends Rpc.Any> {
   readonly protocol: RpcGroup.RpcGroup<Rpcs>
 
   readonly sender: Effect.Effect<
-    <
-      const Tag extends Rpcs["_tag"],
-      Rpc = Rpc.ExtractTag<Rpcs, Tag>,
-      Payload = Rpc.PayloadConstructor<Rpc>,
-    >(
+    <const Tag extends Rpcs["_tag"], Rpc = Rpc.ExtractTag<Rpcs, Tag>>(
       tag: Tag,
       ...args: Types.EqualsWith<
-        Payload,
+        Rpc.PayloadConstructor<Rpc>,
         void,
-        [payload?: Payload],
-        [payload: Payload]
+        [payload?: Rpc.PayloadConstructor<Rpc>],
+        [payload: Rpc.PayloadConstructor<Rpc>]
       >
     ) => Effect.Effect<void>,
     never,
@@ -463,17 +459,13 @@ export const RpcStateChanges = <State extends Schema.Top, Rpcs extends Rpc.Any>(
 export interface Actor<State extends Schema.Top, Rpcs extends Rpc.Any> {
   readonly changes: Stream.Stream<State["Type"]>
   readonly state: MutableRef.MutableRef<State["Type"]>
-  send<
-    Tag extends Rpcs["_tag"],
-    Rpc = Rpc.ExtractTag<Rpcs, Tag>,
-    Payload = Rpc.PayloadConstructor<Rpc>,
-  >(
+  send<Tag extends Rpcs["_tag"], Rpc = Rpc.ExtractTag<Rpcs, Tag>>(
     tag: Tag,
     ...args: Types.EqualsWith<
-      Payload,
+      Rpc.PayloadConstructor<Rpc>,
       void,
-      [payload?: Payload],
-      [payload: Payload]
+      [payload?: Rpc.PayloadConstructor<Rpc>],
+      [payload: Rpc.PayloadConstructor<Rpc>]
     >
   ): Rpc.SuccessSchema<Rpc> extends RpcSchema.Stream<infer A, infer E>
     ? Stream.Stream<A["Type"], E["Type"]>
