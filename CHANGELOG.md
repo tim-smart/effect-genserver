@@ -1,5 +1,13 @@
 # clanka
 
+## 0.1.2
+
+### Patch Changes
+
+- [`c940078`](https://github.com/tim-smart/effect-genserver/commit/c940078bc04b3e68519f18f79fa70bd8860e34d3) Thanks [@tim-smart](https://github.com/tim-smart)! - support deferred responses
+
+- [`164bacb`](https://github.com/tim-smart/effect-genserver/commit/164bacb51628d211d8999a730116ad47c8df5dc4) Thanks [@tim-smart](https://github.com/tim-smart)! - fix payload type safety
+
 ## 0.1.1
 
 ### Patch Changes
