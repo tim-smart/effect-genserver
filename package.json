@@ -29,23 +29,22 @@
     "url": "https://github.com/tim-smart/effect-genserver.git"
   },
   "packageManager": "pnpm@10.28.0+sha512.05df71d1421f21399e053fde567cea34d446fa02c76571441bfc1c7956e98e363088982d940465fd34480d4d90a0668bc12362f8aa88000a64e83d0b0e47be48",
-  "dependencies": {},
   "peerDependencies": {
-    "effect": "4.0.0-beta.50"
+    "effect": "4.0.0-beta.51"
   },
   "devDependencies": {
     "@changesets/changelog-github": "^0.6.0",
-    "@changesets/cli": "^2.29.8",
+    "@changesets/cli": "^2.31.0",
     "@effect/language-service": "^0.85.1",
-    "@effect/vitest": "4.0.0-beta.50",
+    "@effect/vitest": "4.0.0-beta.51",
     "@types/node": "^25.6.0",
-    "@typescript/native-preview": "7.0.0-dev.20260412.1",
-    "effect": "4.0.0-beta.50",
+    "@typescript/native-preview": "7.0.0-dev.20260419.1",
+    "effect": "4.0.0-beta.51",
     "husky": "^9.1.7",
     "lint-staged": "^16.4.0",
-    "oxlint": "^1.57.0",
-    "prettier": "^3.8.2",
-    "typescript": "^6.0.2",
+    "oxlint": "^1.60.0",
+    "prettier": "^3.8.3",
+    "typescript": "^6.0.3",
     "vitest": "^4.1.1"
   },
   "lint-staged": {

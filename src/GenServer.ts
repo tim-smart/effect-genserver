@@ -459,6 +459,7 @@ export const RpcStateChanges = <State extends Schema.Top, Rpcs extends Rpc.Any>(
 export interface Actor<State extends Schema.Top, Rpcs extends Rpc.Any> {
   readonly changes: Stream.Stream<State["Type"]>
   readonly state: MutableRef.MutableRef<State["Type"]>
+
   send<Tag extends Rpcs["_tag"], Rpc = Rpc.ExtractTag<Rpcs, Tag>>(
     tag: Tag,
     ...args: Types.EqualsWith<
@@ -470,6 +471,16 @@ export interface Actor<State extends Schema.Top, Rpcs extends Rpc.Any> {
   ): Rpc.SuccessSchema<Rpc> extends RpcSchema.Stream<infer A, infer E>
     ? Stream.Stream<A["Type"], E["Type"]>
     : Effect.Effect<Rpc.Success<Rpc>, Rpc.Error<Rpc>>
+
+  sendDiscard<Tag extends Rpcs["_tag"], Rpc = Rpc.ExtractTag<Rpcs, Tag>>(
+    tag: Tag,
+    ...args: Types.EqualsWith<
+      Rpc.PayloadConstructor<Rpc>,
+      void,
+      [payload?: Rpc.PayloadConstructor<Rpc>],
+      [payload: Rpc.PayloadConstructor<Rpc>]
+    >
+  ): Effect.Effect<void>
 }
 
 /**
@@ -492,6 +503,7 @@ export const makeActor = Effect.fnUntraced(function* <
   E,
   Exclude<R, SendDiscard> | Scope.Scope
 > {
+  const scope = yield* Effect.scope
   const requestContext = options?.requestContext ?? Context.empty()
 
   const { handlers, state, pubsub } = yield* makeHandlers(schema, layer)
@@ -523,9 +535,34 @@ export const makeActor = Effect.fnUntraced(function* <
         )
   }
 
+  const sendDiscard = <
+    Tag extends Rpcs["_tag"],
+    Rpc = Rpc.ExtractTag<Rpcs, Tag>,
+  >(
+    tag: Tag,
+    payload_?: Rpc.PayloadConstructor<Rpc>,
+  ) => {
+    const entry = handlers.get(tag)
+    if (!entry) {
+      return Effect.die(`Unknown tag: ${tag}`)
+    }
+    const result = entry.handler({
+      payload:
+        payload_ !== undefined
+          ? entry.rpc.payloadSchema.make(payload_)
+          : undefined,
+      context: requestContext,
+    })
+    const eff = Stream.isStream(result) ? Stream.runDrain(result) : result
+    return Effect.forkIn(eff, scope, { startImmediately: true }).pipe(
+      Effect.asVoid,
+    )
+  }
+
   return identity<Actor<State, Rpcs>>({
     changes: Stream.fromPubSub(pubsub),
     state,
     send: send as any,
+    sendDiscard: sendDiscard as any,
   })
 })
