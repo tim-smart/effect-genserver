@@ -18,8 +18,8 @@ importers:
         specifier: ^0.85.1
         version: 0.85.1
       '@effect/vitest':
-        specifier: 4.0.0-beta.51
-        version: 4.0.0-beta.51(effect@4.0.0-beta.51)(vitest@4.1.4(@types/node@25.6.0)(vite@8.0.8(@types/node@25.6.0)(yaml@2.8.3)))
+        specifier: 4.0.0-beta.52
+        version: 4.0.0-beta.52(effect@4.0.0-beta.52)(vitest@4.1.4(@types/node@25.6.0)(vite@8.0.8(@types/node@25.6.0)(yaml@2.8.3)))
       '@types/node':
         specifier: ^25.6.0
         version: 25.6.0
@@ -27,8 +27,8 @@ importers:
         specifier: 7.0.0-dev.20260419.1
         version: 7.0.0-dev.20260419.1
       effect:
-        specifier: 4.0.0-beta.51
-        version: 4.0.0-beta.51
+        specifier: 4.0.0-beta.52
+        version: 4.0.0-beta.52
       husky:
         specifier: ^9.1.7
         version: 9.1.7
@@ -119,10 +119,10 @@ packages:
     resolution: {integrity: sha512-EXnJjIy6zQ3nUO/MZ+ynWUb8B895KZPotd1++oTs9JjDkplwM7cb6zo8Zq2zU6piwq+KflO7amXbEfj1UMpHkw==}
     hasBin: true
 
-  '@effect/vitest@4.0.0-beta.51':
-    resolution: {integrity: sha512-vRNwI8G3PdtVz+9cDmE8+KCbAp+2hGMa2ZSaqrb1yzBt0ZBltl1wLzRa9C5sf7Ite9B1euQpQN6+xEe+y2Gdqw==}
+  '@effect/vitest@4.0.0-beta.52':
+    resolution: {integrity: sha512-xFHdZ9iwfbtfsqKEli0ZrowLijosWh3QUnVYvV3gxkWuU2oMfgG/FiA6jw9b2UkdqKA+X9uUFwBALVFK59ncKA==}
     peerDependencies:
-      effect: ^4.0.0-beta.51
+      effect: ^4.0.0-beta.52
       vitest: ^3.0.0 || ^4.0.0
 
   '@emnapi/core@1.9.2':
@@ -588,8 +588,8 @@ packages:
     resolution: {integrity: sha512-IrPdXQsk2BbzvCBGBOTmmSH5SodmqZNt4ERAZDmW4CT+tL8VtvinqywuANaFu4bOMWki16nqf0e4oC0QIaDr/g==}
     engines: {node: '>=10'}
 
-  effect@4.0.0-beta.51:
-    resolution: {integrity: sha512-Xo4MDGMhAAw/jPTT5zYk1H2FnllAVsSdZWLag+0yY4Hi1rksgReE2M4vFdqgl9wPV+30wVMvd95oPAczs71HIg==}
+  effect@4.0.0-beta.52:
+    resolution: {integrity: sha512-Aa9T5CEV3pCoSDM8sOnalwYieJi5olb7vn8TbgMB3U1YGEOG9ypogng33qMFLKswZM2UimwrXL9Ri1x9Jo9z6w==}
 
   emoji-regex@10.6.0:
     resolution: {integrity: sha512-toUI84YS5YmxW219erniWD0CIVOo46xGKColeNQRgOzDorgBi1v4D71/OFzgD9GO2UGKIv1C3Sp8DAn0+j5w7A==}
@@ -1401,9 +1401,9 @@ snapshots:
 
   '@effect/language-service@0.85.1': {}
 
-  '@effect/vitest@4.0.0-beta.51(effect@4.0.0-beta.51)(vitest@4.1.4(@types/node@25.6.0)(vite@8.0.8(@types/node@25.6.0)(yaml@2.8.3)))':
+  '@effect/vitest@4.0.0-beta.52(effect@4.0.0-beta.52)(vitest@4.1.4(@types/node@25.6.0)(vite@8.0.8(@types/node@25.6.0)(yaml@2.8.3)))':
     dependencies:
-      effect: 4.0.0-beta.51
+      effect: 4.0.0-beta.52
       vitest: 4.1.4(@types/node@25.6.0)(vite@8.0.8(@types/node@25.6.0)(yaml@2.8.3))
 
   '@emnapi/core@1.9.2':
@@ -1755,7 +1755,7 @@ snapshots:
 
   dotenv@8.6.0: {}
 
-  effect@4.0.0-beta.51:
+  effect@4.0.0-beta.52:
     dependencies:
       '@standard-schema/spec': 1.1.0
       fast-check: 4.6.0
