@@ -1,5 +1,13 @@
 # clanka
 
+## 0.1.4
+
+### Patch Changes
+
+- [`7c87aaa`](https://github.com/tim-smart/effect-genserver/commit/7c87aaac854de1f064b72724f127ff9adecf0594) Thanks [@tim-smart](https://github.com/tim-smart)! - relax peer deps
+
+- [`afed415`](https://github.com/tim-smart/effect-genserver/commit/afed41501be1f634e2b690fb8a4e75a06944cfde) Thanks [@tim-smart](https://github.com/tim-smart)! - update effect
+
 ## 0.1.3
 
 ### Patch Changes
