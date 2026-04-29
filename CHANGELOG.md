@@ -1,5 +1,11 @@
 # clanka
 
+## 0.1.6
+
+### Patch Changes
+
+- [`b9fecd0`](https://github.com/tim-smart/effect-genserver/commit/b9fecd0b0954d25ef4f2344756adbe24e6313081) Thanks [@tim-smart](https://github.com/tim-smart)! - fix initial state support in AtomGenServer
+
 ## 0.1.5
 
 ### Patch Changes
