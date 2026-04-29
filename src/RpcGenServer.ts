@@ -23,11 +23,13 @@ export const toRpcHandlers = <
 >(
   schema: GenServer.GenServer<State, Rpcs>,
   layer: Layer.Layer<GenServer.ToHandler<Rpcs> | GenServer.InitialState, E, R>,
-): Layer.Layer<
-  Rpc.ToHandler<Rpcs> | Rpc.Handler<"GenServerChanges">,
-  E,
-  Exclude<R, GenServer.SendDiscard>
-> =>
+): [State] extends [GenServer.InMemory<any>]
+  ? "In-memory state cannot be used for RPC"
+  : Layer.Layer<
+      Rpc.ToHandler<Rpcs> | Rpc.Handler<"GenServerChanges">,
+      E,
+      Exclude<R, GenServer.SendDiscard>
+    > =>
   Layer.effectContext(
     Effect.gen(function* () {
       const { handlers } = yield* GenServer.makeHandlers(schema, layer)
@@ -51,7 +53,7 @@ export const toRpcHandlers = <
 
       return Context.makeUnsafe(contextMap)
     }),
-  )
+  ) as any
 
 /**
  * @since 1.0.0

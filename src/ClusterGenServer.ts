@@ -24,19 +24,21 @@ export const entity = <
 >(
   type: Type,
   schema: GenServer.GenServer<State, Rpcs>,
-): Entity.Entity<
-  Type,
-  | Rpcs
-  | Rpc.Rpc<
-      "GenServerChanges",
-      Schema.Void,
-      RpcSchema.Stream<State, Schema.Never>
-    >
-> =>
+): [State] extends [GenServer.InMemory<any>]
+  ? "In-memory state cannot be used for cluster entities"
+  : Entity.Entity<
+      Type,
+      | Rpcs
+      | Rpc.Rpc<
+          "GenServerChanges",
+          Schema.Void,
+          RpcSchema.Stream<State, Schema.Never>
+        >
+    > =>
   Entity.fromRpcGroup(
     type,
     schema.protocol.add(GenServer.RpcStateChanges(schema)),
-  )
+  ) as any
 
 /**
  * @since 1.0.0

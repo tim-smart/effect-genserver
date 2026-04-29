@@ -65,14 +65,16 @@ export interface GenServer<State extends Schema.Top, Rpcs extends Rpc.Any> {
         State["DecodingServices"]
       >,
     ) => Effect.Effect<readonly [state: State["Type"], handlers: A], E, R>,
-  ): Layer.Layer<
-    ToHandler<Rpcs> | InitialState,
-    E,
-    | Exclude<R, Scope.Scope>
-    | HandlerServices<A>
-    | Persistence.BackingPersistence
-    | State["EncodingServices"]
-  >
+  ): [State] extends [InMemory<any>]
+    ? "In-memory state cannot be persisted"
+    : Layer.Layer<
+        ToHandler<Rpcs> | InitialState,
+        E,
+        | Exclude<R, Scope.Scope>
+        | HandlerServices<A>
+        | Persistence.BackingPersistence
+        | State["EncodingServices"]
+      >
 }
 
 /**
@@ -93,8 +95,26 @@ export interface Handler<Tag extends string> {
 }
 
 /**
+ * Use this to declare state as in-memory only.
+ *
  * @since 1.0.0
- * @category Initial state
+ * @category Schema
+ */
+export interface InMemory<Type> extends Schema.declare<Type> {
+  readonly _: unique symbol
+}
+
+/**
+ * Use this to declare state as in-memory only.
+ *
+ * @since 1.0.0
+ * @category Schema
+ */
+export const inMemory = <Type>(): InMemory<Type> => Schema.Any as any
+
+/**
+ * @since 1.0.0
+ * @category SendDiscard
  */
 export class SendDiscard extends Context.Service<
   SendDiscard,
@@ -254,7 +274,7 @@ const Proto: Omit<GenServer<any, any>, "stateSchema" | "protocol"> = {
     options?: {
       readonly storeId?: string | undefined
     },
-  ) {
+  ): any {
     // oxlint-disable-next-line typescript/no-this-alias
     const schema = this
     const storeId = options?.storeId ?? "machine"
@@ -304,7 +324,7 @@ const Proto: Omit<GenServer<any, any>, "stateSchema" | "protocol"> = {
           return Context.makeUnsafe(handlerMap)
         }),
       ),
-    )
+    ) satisfies Layer.Layer<ToHandler<any> | InitialState, any, any>
   },
 }
 
