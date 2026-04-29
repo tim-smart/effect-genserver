@@ -12,7 +12,6 @@ import { identity, pipe } from "effect/Function"
 import * as Stream from "effect/Stream"
 import * as AsyncResult from "effect/unstable/reactivity/AsyncResult"
 import * as Duration from "effect/Duration"
-import type { unassigned } from "effect/Types"
 
 /**
  * @since 1.0.0
@@ -72,7 +71,7 @@ export const make = <
   State extends Schema.Top,
   Rpcs extends Rpc.Any,
   E,
-  InitialState extends State["Type"] = unassigned,
+  InitialState extends State["Type"] | undefined = undefined,
 >(
   server: GenServer.GenServer<State, Rpcs>,
   layer:
@@ -91,13 +90,13 @@ export const make = <
   options?: {
     readonly memoMap?: Layer.MemoMap | undefined
     readonly actorIdleTTL?: Duration.Input | undefined
-    readonly initialState?: InitialState | undefined
+    readonly initialState?: InitialState
   },
 ): GenServerAtom<
   State,
   Rpcs,
   E,
-  [InitialState] extends [unassigned] ? never : true
+  [InitialState] extends [undefined] ? never : true
 > => {
   const memoMap = options?.memoMap ?? Atom.runtime.memoMap
 
