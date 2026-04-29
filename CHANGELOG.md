@@ -1,5 +1,11 @@
 # clanka
 
+## 0.1.5
+
+### Patch Changes
+
+- [`c90be40`](https://github.com/tim-smart/effect-genserver/commit/c90be40c19ee192ee646d01a68d2d2b91164c407) Thanks [@tim-smart](https://github.com/tim-smart)! - support in-memory state
+
 ## 0.1.4
 
 ### Patch Changes
