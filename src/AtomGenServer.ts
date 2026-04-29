@@ -24,7 +24,7 @@ export interface GenServerAtom<
   InitialState extends boolean,
   // oxlint-disable-next-line import/namespace
 > extends Atom.Writable<
-  [InitialState] extends [true]
+  [true] extends [InitialState]
     ? State["Type"]
     : AsyncResult.AsyncResult<State["Type"], E>,
   Rpcs extends Rpc.Rpc<
