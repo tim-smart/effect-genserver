@@ -1,5 +1,11 @@
 # clanka
 
+## 0.1.8
+
+### Patch Changes
+
+- [`d693238`](https://github.com/tim-smart/effect-genserver/commit/d693238243b447dcdfa9d49876ef3b3198173080) Thanks [@tim-smart](https://github.com/tim-smart)! - update effect
+
 ## 0.1.7
 
 ### Patch Changes
