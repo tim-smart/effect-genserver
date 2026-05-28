@@ -507,6 +507,13 @@ export interface Actor<State extends Schema.Top, Rpcs extends Rpc.Any> {
  * @since 1.0.0
  * @category Actor
  */
+export type ActorFrom<Server extends GenServer<any, any>> =
+  Server extends GenServer<infer State, infer Rpcs> ? Actor<State, Rpcs> : never
+
+/**
+ * @since 1.0.0
+ * @category Actor
+ */
 export const makeActor = Effect.fnUntraced(function* <
   State extends Schema.Top,
   Rpcs extends Rpc.Any,
