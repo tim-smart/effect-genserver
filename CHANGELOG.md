@@ -1,5 +1,11 @@
 # clanka
 
+## 0.1.9
+
+### Patch Changes
+
+- [`c4b97ee`](https://github.com/tim-smart/effect-genserver/commit/c4b97eef66ee314bb722252d5fc455be358b11b7) Thanks [@tim-smart](https://github.com/tim-smart)! - add ActorFrom type helper
+
 ## 0.1.8
 
 ### Patch Changes
