@@ -385,7 +385,11 @@ export const makeHandlers = Effect.fnUntraced(function* <
     const eff = started
       ? sendDiscardImpl(tag, payload)
       : startLatch.whenOpen(sendDiscardImpl(tag, payload))
-    return eff.pipe(Effect.forkIn(scope), Effect.asVoid)
+    return eff.pipe(
+      sendSemaphore.withPermit,
+      Effect.forkIn(scope),
+      Effect.asVoid,
+    )
   }
   const sendDiscardImpl = (tag: string, payload: any) =>
     Effect.suspend(() => {
