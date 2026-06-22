@@ -1,7 +1,7 @@
 {
   "name": "effect-genserver",
   "type": "module",
-  "version": "0.1.10",
+  "version": "0.1.11",
   "publishConfig": {
     "access": "public"
   },
