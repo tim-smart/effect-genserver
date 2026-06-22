@@ -1,5 +1,11 @@
 # clanka
 
+## 0.1.10
+
+### Patch Changes
+
+- [`16c8e50`](https://github.com/tim-smart/effect-genserver/commit/16c8e503ece2179ef1b23bd43a91144dedc7e524) Thanks [@tim-smart](https://github.com/tim-smart)! - guard send discard with the internal semaphore
+
 ## 0.1.9
 
 ### Patch Changes
