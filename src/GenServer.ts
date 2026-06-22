@@ -15,7 +15,7 @@ import * as PubSub from "effect/PubSub"
 import * as MutableRef from "effect/MutableRef"
 import * as Stream from "effect/Stream"
 import * as Semaphore from "effect/Semaphore"
-import { flow, identity, pipe } from "effect/Function"
+import { flow, identity } from "effect/Function"
 import * as RpcSchema from "effect/unstable/rpc/RpcSchema"
 import * as Latch from "effect/Latch"
 import type { Types } from "effect"
@@ -385,11 +385,7 @@ export const makeHandlers = Effect.fnUntraced(function* <
     const eff = started
       ? sendDiscardImpl(tag, payload)
       : startLatch.whenOpen(sendDiscardImpl(tag, payload))
-    return eff.pipe(
-      sendSemaphore.withPermit,
-      Effect.forkIn(scope),
-      Effect.asVoid,
-    )
+    return eff.pipe(Effect.forkIn(scope), Effect.asVoid)
   }
   const sendDiscardImpl = (tag: string, payload: any) =>
     Effect.suspend(() => {
@@ -422,35 +418,48 @@ export const makeHandlers = Effect.fnUntraced(function* <
   })
 
   for (const rpc of schema.protocol.requests.values()) {
+    const rpcWithProps = rpc as any as Rpc.AnyWithProps
     const handler = services.mapUnsafe.get(handlerKey(rpc._tag)) as HandlerFn<
       State,
       any,
       never
     >
+    const isStream = RpcSchema.isStreamSchema(rpcWithProps.successSchema)
     handlers.set(rpc._tag, {
       rpc: rpc as any,
-      handler: (options) => {
-        const result = handler({
-          state: state.current,
-          changes,
-          payload: options.payload,
-          context: options.context,
-        }) as
-          | Stream.Stream<any, any>
-          | Effect.Effect<[any, {} | Deferred.Deferred<any, any>], any>
-        if (Stream.isStream(result)) return result
-        return pipe(
-          result,
-          Effect.map(([nextState, result]) => {
-            if (nextState !== state.current) {
-              MutableRef.set(state, nextState)
-              PubSub.publishUnsafe(pubsub, nextState)
-            }
-            return result
-          }),
-          sendSemaphore.withPermits(1),
-        )
-      },
+      handler: isStream
+        ? (options) =>
+            Stream.suspend(
+              () =>
+                handler({
+                  state: state.current,
+                  changes,
+                  payload: options.payload,
+                  context: options.context,
+                }) as any as Stream.Stream<any, any>,
+            )
+        : (options) =>
+            Effect.suspend(
+              () =>
+                handler({
+                  state: state.current,
+                  changes,
+                  payload: options.payload,
+                  context: options.context,
+                }) as Effect.Effect<
+                  [any, {} | Deferred.Deferred<any, any>],
+                  any
+                >,
+            ).pipe(
+              Effect.map(([nextState, result]) => {
+                if (nextState !== state.current) {
+                  MutableRef.set(state, nextState)
+                  PubSub.publishUnsafe(pubsub, nextState)
+                }
+                return result
+              }),
+              sendSemaphore.withPermits(1),
+            ),
     })
   }
 
