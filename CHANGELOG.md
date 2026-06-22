@@ -1,5 +1,11 @@
 # clanka
 
+## 0.1.11
+
+### Patch Changes
+
+- [`7535fcd`](https://github.com/tim-smart/effect-genserver/commit/7535fcd6ab2a769140206ac1b936ff3bb79b713b) Thanks [@tim-smart](https://github.com/tim-smart)! - ensure state is captured correctly
+
 ## 0.1.10
 
 ### Patch Changes
